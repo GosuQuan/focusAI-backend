@@ -59,11 +59,21 @@ export function withAuth(handler: any, requiredRole?: Role) {
     }
 
     if (requiredRole && user.role !== requiredRole && user.role !== Role.ADMIN) {
-      return res.status(403).json({ error: 'Forbidden' });
+      console.log(user.role)
+      return res.status(403).json({ error: 'need admin' });
     }
 
-    req.user = user;
-    return handler(req, res);
+    // 将用户信息添加到请求对象
+    (req as any).user = user;
+
+    // 检查 handler 类型并相应处理
+    if (typeof handler === 'function') {
+      return handler(req, res);
+    } else if (handler && typeof handler.run === 'function') {
+      return handler.run(req, res);
+    } else {
+      throw new Error('Invalid handler provided to withAuth');
+    }
   };
 }
 

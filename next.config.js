@@ -1,8 +1,37 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  webpack: (config) => {
+  // 开启 Turbopack
+  experimental: {
+    turbo: true,
+    // 优化构建追踪
+    turbotrace: {
+      logLevel: "error",
+      logDetail: true
+    }
+  },
+
+  // 开启 SWC 编译器优化
+  swcMinify: true,
+
+  webpack: (config, { dev, isServer }) => {
+    // 生产环境优化
+    if (!dev) {
+      config.optimization.minimize = true;
+    }
     return config;
   },
+
+  // 配置构建输出
+  output: 'standalone',
+
+  // 优化图片处理
+  images: {
+    domains: [],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+  },
+
+  // CORS 配置
   async headers() {
     return [
       {

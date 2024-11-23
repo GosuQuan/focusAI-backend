@@ -2,19 +2,23 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { loginUser, setAuthCookie } from '../../../lib/auth';
 import { z } from 'zod';
 import { cors } from '../../../middleware/cors';
-import nc from 'next-connect';
+import { createRouter } from 'next-connect';
 
 const loginSchema = z.object({
-  email: z.string().email('Invalid email format'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  email: z.string().email('邮箱格式不正确'),
+  password: z.string().min(6, '密码至少需要6个字符'),
 });
 
-const handler = nc<NextApiRequest, NextApiResponse>()
+const handler = createRouter<NextApiRequest, NextApiResponse>();
+
+handler
   .use(cors)
   .post(async (req, res) => {
     try {
+      console.log(req.body);  
       const validatedData = loginSchema.parse(req.body);
       const result = await loginUser(validatedData.email, validatedData.password);
+
 
       if (!result) {
         return res.status(401).json({ error: 'Invalid credentials' });
@@ -32,6 +36,7 @@ const handler = nc<NextApiRequest, NextApiResponse>()
         },
       });
     } catch (error) {
+      console.log(error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: error.errors });
       }
@@ -40,4 +45,4 @@ const handler = nc<NextApiRequest, NextApiResponse>()
     }
   });
 
-export default handler;
+export default handler.handler();

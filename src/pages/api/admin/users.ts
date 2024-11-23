@@ -6,8 +6,9 @@ import { cors } from '../../../middleware/cors';
 
 const prisma = new PrismaClient();
 
+// 创建基础路由处理器
 const handler = createRouter<NextApiRequest, NextApiResponse>()
-  .use(cors) // 使用CORS中间件
+  .use(cors)
   .get(async (req, res) => {
     try {
       const users = await prisma.user.findMany({
@@ -20,7 +21,7 @@ const handler = createRouter<NextApiRequest, NextApiResponse>()
           updatedAt: true,
         },
       });
-      return res.status(200).json({ users });
+      return res.status(200).json(users);
     } catch (error) {
       console.error('Error fetching users:', error);
       return res.status(500).json({ error: 'Internal server error' });
@@ -46,7 +47,7 @@ const handler = createRouter<NextApiRequest, NextApiResponse>()
           updatedAt: true,
         },
       });
-      return res.status(200).json({ user });
+      return res.status(200).json(user);
     } catch (error) {
       console.error('Error updating user:', error);
       return res.status(500).json({ error: 'Internal server error' });
@@ -70,5 +71,5 @@ const handler = createRouter<NextApiRequest, NextApiResponse>()
     }
   });
 
-// 添加身份验证中间件，只允许管理员访问
+// 使用 withAuth 包装路由处理器
 export default withAuth(handler, Role.ADMIN);
